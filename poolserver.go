@@ -76,7 +76,9 @@ func InitHTTPDefaultTransport(cfg config.ServiceConfig) {
 func RunServer(ctx context.Context, cfg config.ServiceConfig, handler http.Handler) error {
 	done := make(chan error)
 
-	v := serverPool.Get().NewServer(cfg,handler)
+	spool := poolServer(cfg, handler)
+	v := spool.Get()
+	s := v.(*http.Server)
 	s.Handler = handler
 
 	if s.TLSConfig == nil {
@@ -98,20 +100,27 @@ func RunServer(ctx context.Context, cfg config.ServiceConfig, handler http.Handl
 	select {
 	case err := <-done:
 		s.Handler = nil
-		serverPool.Put(v)
+		spool.Put(v)
 		return err
 	case <-ctx.Done():
 		s.Handler = nil
-		serverPool.Put(v)
-		// backgroundもpool化したらShutdownの中身をPool.Putに改造する
+		spool.Put(v)
+		// TODO:backgroundもpool化したらShutdownの中身をPool.Putに改造する
 		return s.Shutdown(context.Background())
 	}
 }
 
-var serverPool = sync.Pool {
-	New: func(cfg config.ServiceConfig, handler http.Handler) interface{} {
-		return NewServer(cfg,handler)
+func poolServer(cfg config.ServiceConfig, handler http.Handler) *sync.Pool {
+	createNewServer := func() interface{} {
+		s := NewServer(cfg, handler)
+		return s
 	}
+	p := &sync.Pool{New: createNewServer}
+
+	for i := 0; i < 100; i++ {
+		p.Put(p.New())
+	}
+	return p
 }
 
 // NewServer returns a http.Server ready to serve the injected handler
