@@ -8,28 +8,29 @@ import (
 
 	krakendbf "github.com/devopsfaith/bloomfilter/krakend"
 	cel "github.com/devopsfaith/krakend-cel"
-	"github.com/devopsfaith/krakend-cobra"
+	//"github.com/devopsfaith/krakend-cobra"
+	cmd "github.com/devopsfaith/krakend-cobra"
 	gelf "github.com/devopsfaith/krakend-gelf"
-	"github.com/devopsfaith/krakend-gologging"
-	"github.com/devopsfaith/krakend-jose"
+	gologging "github.com/devopsfaith/krakend-gologging"
+	jose "github.com/devopsfaith/krakend-jose"
 	logstash "github.com/devopsfaith/krakend-logstash"
 	metrics "github.com/devopsfaith/krakend-metrics/gin"
-	"github.com/devopsfaith/krakend-opencensus"
+	opencensus "github.com/devopsfaith/krakend-opencensus"
 	_ "github.com/devopsfaith/krakend-opencensus/exporter/influxdb"
-	_ "github.com/devopsfaith/krakend-opencensus/exporter/jaeger"
-	_ "github.com/devopsfaith/krakend-opencensus/exporter/prometheus"
+	//_ "github.com/devopsfaith/krakend-opencensus/exporter/jaeger"
+	//_ "github.com/devopsfaith/krakend-opencensus/exporter/prometheus"
 	_ "github.com/devopsfaith/krakend-opencensus/exporter/stackdriver"
-	_ "github.com/devopsfaith/krakend-opencensus/exporter/xray"
-	_ "github.com/devopsfaith/krakend-opencensus/exporter/zipkin"
+	//_ "github.com/devopsfaith/krakend-opencensus/exporter/xray"
+	//_ "github.com/devopsfaith/krakend-opencensus/exporter/zipkin"
 	pubsub "github.com/devopsfaith/krakend-pubsub"
 	"github.com/devopsfaith/krakend-usage/client"
 	"github.com/devopsfaith/krakend/config"
 	"github.com/devopsfaith/krakend/logging"
-	krakendrouter "github.com/devopsfaith/krakend/router"
+	//krakendrouter "github.com/devopsfaith/krakend/router"
 	router "github.com/devopsfaith/krakend/router/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/go-contrib/uuid"
-	"github.com/letgoapp/krakend-influx"
+	influxdb "github.com/letgoapp/krakend-influx"
 )
 
 func NewExecutor(ctx context.Context) cmd.Executor {
@@ -106,7 +107,8 @@ func NewExecutor(ctx context.Context) cmd.Executor {
 			Middlewares:    []gin.HandlerFunc{},
 			Logger:         logger,
 			HandlerFactory: NewHandlerFactory(logger, metricCollector, tokenRejecterFactory),
-			RunServer:      krakendrouter.RunServer,
+			//RunServer:      krakendrouter.RunServer,
+			RunServer:      RunServer,
 		})
 
 		// start the engines
